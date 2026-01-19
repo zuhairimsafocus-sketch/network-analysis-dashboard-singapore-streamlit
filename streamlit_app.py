@@ -157,17 +157,43 @@ def build_payload():
 def main():
     # Optional: hide Streamlit chrome for a cleaner 1:1 look
     st.markdown(
-        """
-        <style>
-          #MainMenu {visibility: hidden;}
-          header {visibility: hidden;}
-          footer {visibility: hidden;}
-          .block-container {padding-top: 0rem; padding-bottom: 0rem;}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+    """
+    <style>
+      /* Kill Streamlit chrome space completely */
+      #MainMenu {visibility: hidden;}
+      footer {visibility: hidden;}
 
+      /* Streamlit header: hide + collapse height */
+      header[data-testid="stHeader"] {
+        display: none !important;
+        height: 0 !important;
+      }
+
+      /* Remove all paddings/margins from main containers */
+      .block-container,
+      section.main,
+      [data-testid="stAppViewContainer"],
+      [data-testid="stMainBlockContainer"],
+      [data-testid="stApp"]{
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+      }
+
+      /* Also remove the toolbar space (Streamlit Cloud sometimes reserves this) */
+      [data-testid="stToolbar"]{
+        display: none !important;
+        height: 0 !important;
+      }
+
+      html, body{
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
     payload = build_payload()
 
     # Load HTML template
@@ -183,3 +209,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
