@@ -400,29 +400,30 @@ function initDistrictMap(districtData){
   const rawName = getGeoDistrictName(feature.properties || {});
   const k = normalizeDistrictName(rawName);
   const value = lookup[k] ?? 0;
+  const v = Number(value) || 0;
 
-  // no fill for 0-34
-  // no fill + no border for 0-34
-if ((Number(value) || 0) <= 34){
-  return {
-    fill: false,
-    stroke: false,   // IMPORTANT: buang garis sempadan
-    weight: 0,
-    opacity: 0
-  };
-}
+  // 0-34: no color, no border
+  if (v <= 34){
+    return {
+      fill: false,
+      stroke: false,
+      weight: 0,
+      opacity: 0
+    };
+  }
 
-
-  // 35-50 yellow, 51+ red
-  const c = (value <= 50) ? "#facc15" : "#dc2626";
+  // 35-50 yellow, 51+ red (NO BORDER)
+  const c = (v <= 50) ? "#facc15" : "#dc2626";
 
   return {
     fill: true,
     fillColor: c,
     fillOpacity: 0.70,
-    weight: 0.8,
-    color: "#374151",
-    opacity: 1
+
+    // IMPORTANT: remove borders even for colored areas
+    stroke: false,
+    weight: 0,
+    opacity: 0
   };
 },
     onEachFeature: (feature, layer) => {
@@ -755,3 +756,4 @@ loadDashboard();
 </script>
 </body>
 </html>
+
