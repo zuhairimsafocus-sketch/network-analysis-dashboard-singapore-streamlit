@@ -177,6 +177,35 @@ canvas{ display:block; width:100% !important; height:100% !important; }
   .cards{ grid-template-columns:repeat(2,1fr); }
   .grid{ column-count:1; }
 }
+
+/* =========================================================
+   NEW: Scrollbar styling (Dark Grey)
+   - Chrome/Edge/Safari: ::-webkit-scrollbar*
+   - Firefox: scrollbar-color / scrollbar-width
+   ========================================================= */
+
+/* Chrome/Edge/Safari */
+body::-webkit-scrollbar{
+  width: 12px;
+  height: 12px;
+}
+body::-webkit-scrollbar-track{
+  background: #e5e7eb; /* track */
+}
+body::-webkit-scrollbar-thumb{
+  background: #4b5563; /* dark grey thumb */
+  border-radius: 999px;
+  border: 3px solid #e5e7eb; /* spacing + kemas */
+}
+body::-webkit-scrollbar-thumb:hover{
+  background: #374151; /* hover lebih gelap */
+}
+
+/* Firefox */
+body{
+  scrollbar-width: thin;
+  scrollbar-color: #4b5563 #e5e7eb; /* thumb track */
+}
 </style>
 </head>
 
@@ -700,4 +729,3 @@ loadDashboard();
 </script>
 </body>
 </html>
-
