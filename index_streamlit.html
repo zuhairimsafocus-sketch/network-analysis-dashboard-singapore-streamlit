@@ -70,10 +70,13 @@ body{
 .card .pct-inprogress{ color:#065f46; background:#d1fae5; border-color:#a7f3d0; }
 .card .pct-resolved { color:#065f46; background:#d1fae5; border-color:#a7f3d0; }
 
-/* Masonry columns */
+/* =========================================================
+   UPDATED: True row layout using CSS Grid (replaces masonry)
+   ========================================================= */
 .grid{
-  column-count:3;
-  column-gap:20px;
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:20px;
 }
 
 /* Card / chart container */
@@ -82,9 +85,9 @@ body{
   border-radius:14px;
   padding:16px;
   box-shadow:0 8px 20px rgba(0,0,0,0.04);
-  display:inline-block;
+  display:block;            /* UPDATED: was inline-block for masonry */
   width:100%;
-  margin:0 0 20px 0;
+  margin:0;                 /* UPDATED: grid already controls spacing */
   vertical-align:top;
   position:relative;
 }
@@ -171,19 +174,16 @@ canvas{ display:block; width:100% !important; height:100% !important; }
 /* Responsive */
 @media (max-width:1100px){
   .cards{ grid-template-columns:repeat(3,1fr); }
-  .grid{ column-count:2; }
+  .grid{ grid-template-columns:repeat(2,1fr); } /* UPDATED */
 }
 @media (max-width:720px){
   .cards{ grid-template-columns:repeat(2,1fr); }
-  .grid{ column-count:1; }
+  .grid{ grid-template-columns:1fr; } /* UPDATED */
 }
 
 /* =========================================================
-   NEW: Scrollbar styling (Dark Grey)
-   - Chrome/Edge/Safari: ::-webkit-scrollbar*
-   - Firefox: scrollbar-color / scrollbar-width
+   Scrollbar styling (Dark Grey)
    ========================================================= */
-
 /* Chrome/Edge/Safari */
 body::-webkit-scrollbar{
   width: 12px;
@@ -200,7 +200,6 @@ body::-webkit-scrollbar-thumb{
 body::-webkit-scrollbar-thumb:hover{
   background: #374151; /* hover lebih gelap */
 }
-
 /* Firefox */
 body{
   scrollbar-width: thin;
@@ -244,9 +243,10 @@ body{
     </div>
   </div>
 
-  <!-- Masonry: 6 charts -->
+  <!-- Grid: 6 charts (Row 1 and Row 2) -->
   <div class="grid">
 
+    <!-- Row 1 -->
     <div class="chart-box">
       <div class="chart-header">
         <p class="chart-title">Total Complaints by State</p>
@@ -274,6 +274,7 @@ body{
       <div class="insight-panel" data-panel="issue_type"></div>
     </div>
 
+    <!-- Row 2 -->
     <div class="chart-box">
       <div class="chart-header">
         <p class="chart-title">Signal Strength by State</p>
@@ -303,8 +304,8 @@ body{
 
   </div>
 
-  <!-- Full width: Monthly trend -->
-  <div class="chart-box" style="margin-top:6px;">
+  <!-- Row 3: Full width: Monthly trend -->
+  <div class="chart-box" style="margin-top:20px;">
     <div class="chart-header">
       <p class="chart-title">Complaints Reported</p>
       <button class="insight-btn" data-insight="reported_months">Insight</button>
@@ -370,12 +371,14 @@ function getGeoDistrictName(p){
   return (p && (p.PLN_AREA_N || p.pln_area_n || p.name)) ? (p.PLN_AREA_N || p.pln_area_n || p.name) : "";
 }
 /* hijau:0-35, kuning:36-50, merah:51-80+ */
+/* no colour:0-34, kuning:35-50, merah:51-80+ */
 function getHeatColor(v){
   v = Number(v) || 0;
-  if (v <= 35) return "#22c55e";
-  if (v <= 50) return "#facc15";
-  return "#dc2626";
+  if (v <= 34) return null;        // no colour
+  if (v <= 50) return "#facc15";   // yellow
+  return "#dc2626";                // red (51+)
 }
+
 
 function initDistrictMap(districtData){
   const map = L.map("map").setView([1.3521, 103.8198], 11);
@@ -394,11 +397,34 @@ function initDistrictMap(districtData){
 
   const layer = L.geoJSON(geo,{
     style: feature => {
-      const rawName = getGeoDistrictName(feature.properties || {});
-      const k = normalizeDistrictName(rawName);
-      const value = lookup[k] ?? 0;
-      return { fillColor:getHeatColor(value), weight:0.8, color:"#374151", fillOpacity:0.70 };
-    },
+  const rawName = getGeoDistrictName(feature.properties || {});
+  const k = normalizeDistrictName(rawName);
+  const value = lookup[k] ?? 0;
+
+  // no fill for 0-34
+  // no fill + no border for 0-34
+if ((Number(value) || 0) <= 34){
+  return {
+    fill: false,
+    stroke: false,   // IMPORTANT: buang garis sempadan
+    weight: 0,
+    opacity: 0
+  };
+}
+
+
+  // 35-50 yellow, 51+ red
+  const c = (value <= 50) ? "#facc15" : "#dc2626";
+
+  return {
+    fill: true,
+    fillColor: c,
+    fillOpacity: 0.70,
+    weight: 0.8,
+    color: "#374151",
+    opacity: 1
+  };
+},
     onEachFeature: (feature, layer) => {
       const rawName = getGeoDistrictName(feature.properties || {});
       const k = normalizeDistrictName(rawName);
